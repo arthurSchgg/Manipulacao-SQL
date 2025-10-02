@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Interativo de SQL</title>
+    
+    <!-- Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tone.js para efeitos sonoros -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    
+    <!-- Google Fonts para uma tipografia limpa -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilo base para a página */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Efeito de transição suave para elementos */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-cyan-400">Tutorial Interativo de SQL</h1>
+            <p class="text-gray-400 mt-2">Aprenda a diferenciar os grupos de comandos SQL de forma fácil.</p>
+        </header>
+
+        <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+            <!-- Abas de Navegação -->
+            <div class="flex border-b border-gray-700">
+                <button id="tab-aprender" class="tab-btn flex-1 p-4 text-lg font-semibold bg-gray-700 border-b-4 border-cyan-500">🧠 Aprender</button>
+                <button id="tab-identificar" class="tab-btn flex-1 p-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">🔍 Identificar</button>
+                <button id="tab-teste" class="tab-btn flex-1 p-4 text-lg font-semibold text-gray-400 border-b-4 border-transparent">🚀 Teste Rápido</button>
+            </div>
+
+            <!-- Conteúdo das Abas -->
+            <div class="p-6 md:p-8 min-h-[450px]">
+                
+                <!-- ABA APRENDER -->
+                <div id="content-aprender" class="content-tab">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <button class="learn-btn p-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg font-bold transition-all" data-group="DDL">DDL</button>
+                        <button class="learn-btn p-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-all" data-group="DML">DML</button>
+                        <button class="learn-btn p-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-all" data-group="DCL">DCL</button>
+                        <button class="learn-btn p-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-all" data-group="TCL">TCL</button>
+                    </div>
+                    <div id="explanation-area" class="bg-gray-900 p-6 rounded-lg">
+                        <!-- O conteúdo será inserido aqui pelo JavaScript -->
+                    </div>
+                </div>
+
+                <!-- ABA IDENTIFICAR -->
+                <div id="content-identificar" class="content-tab hidden">
+                    <h2 class="text-2xl font-bold text-center mb-4">Que comando é esse?</h2>
+                    <p class="text-gray-400 text-center mb-6">Digite um comando SQL e nós diremos a qual grupo ele pertence.</p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input id="sql-command-input" type="text" class="flex-grow bg-gray-700 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Ex: SELECT, CREATE TABLE, GRANT...">
+                        <button id="identify-btn" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg transition-all">Identificar</button>
+                    </div>
+                    <div id="identify-result" class="mt-8 bg-gray-900 p-6 rounded-lg min-h-[100px] flex items-center justify-center text-center">
+                        <p class="text-gray-500">O resultado aparecerá aqui.</p>
+                    </div>
+                </div>
+                
+                <!-- ABA TESTE RÁPIDO -->
+                <div id="content-teste" class="content-tab hidden text-center">
+                    <div id="quiz-start">
+                        <h2 class="text-2xl font-bold mb-4">Teste seus conhecimentos!</h2>
+                        <p class="text-gray-400 mb-8">Responda 5 perguntas rápidas para ver o que você aprendeu.</p>
+                        <button id="start-quiz-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full text-lg transition-all">Começar Teste</button>
+                    </div>
+                    <div id="quiz-area" class="hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <div id="quiz-progress" class="text-gray-400">Pergunta 1 de 5</div>
+                            <div id="quiz-score" class="text-lg font-bold text-cyan-400">Pontos: 0</div>
+                        </div>
+                        <div id="quiz-question" class="bg-gray-900 p-6 rounded-lg mb-6 text-xl min-h-[100px] flex items-center justify-center"></div>
+                        <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Opções de resposta serão inseridas aqui -->
+                        </div>
+                        <div id="quiz-feedback" class="mt-6 font-bold h-6"></div>
+                    </div>
+                    <div id="quiz-end" class="hidden">
+                        <h2 class="text-3xl font-bold mb-4">Teste Finalizado!</h2>
+                        <p class="text-xl text-gray-300 mb-2">Sua pontuação final foi:</p>
+                        <p id="final-score" class="text-6xl font-bold text-cyan-400 mb-8"></p>
+                        <button id="restart-quiz-btn" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-full text-lg transition-all">Tentar Novamente</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <footer class="text-center mt-8 text-gray-500">
+            <p>Desenvolvido como um tutorial interativo.</p>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- EFEITOS SONOROS ---
+            const synth = new Tone.Synth().toDestination();
+            const playSound = (note, duration = "8n") => {
+                // Inicia o contexto de áudio com a interação do usuário
+                if (Tone.context.state !== 'running') {
+                    Tone.context.resume();
+                }
+                synth.triggerAttackRelease(note, duration);
+            };
+            const soundEffects = {
+                click: "C4",
+                success: "G5",
+                error: "C3",
+                correct: "E5",
+                wrong: "A3"
+            };
+
+            // --- BANCO DE DADOS DE COMANDOS E EXPLICAÇÕES ---
+            const sqlGroups = {
+                DDL: {
+                    name: "Data Definition Language (Linguagem de Definição de Dados)",
+                    emoji: "🏗️",
+                    explanation: "É usada para definir, alterar e remover a estrutura dos objetos do banco de dados, como tabelas, índices e usuários. Pense nela como a planta de uma casa.",
+                    commands: ["CREATE", "ALTER", "DROP", "TRUNCATE", "RENAME"],
+                    examples: [
+                        { cmd: "CREATE TABLE Clientes (...);", desc: "Cria uma nova tabela chamada 'Clientes'." },
+                        { cmd: "ALTER TABLE Clientes ADD email VARCHAR(100);", desc: "Adiciona uma nova coluna de email à tabela." }
+                    ]
+                },
+                DML: {
+                    name: "Data Manipulation Language (Linguagem de Manipulação de Dados)",
+                    emoji: "✏️",
+                    explanation: "É usada para gerenciar os dados dentro das tabelas. Com ela, você pode inserir, atualizar, consultar e excluir registros.",
+                    commands: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+                    examples: [
+                        { cmd: "SELECT nome, email FROM Clientes;", desc: "Busca os nomes e emails de todos os clientes." },
+                        { cmd: "INSERT INTO Clientes (nome, email) VALUES ('Ana', 'ana@email.com');", desc: "Insere um novo registro na tabela." }
+                    ]
+                },
+                DCL: {
+                    name: "Data Control Language (Linguagem de Controle de Dados)",
+                    emoji: "🔐",
+                    explanation: "É usada para controlar o acesso aos dados no banco de dados. Define quem pode ver ou modificar o quê, gerenciando permissões e privilégios.",
+                    commands: ["GRANT", "REVOKE"],
+                    examples: [
+                        { cmd: "GRANT SELECT ON Clientes TO usuario_atendente;", desc: "Dá permissão de leitura na tabela 'Clientes' para um usuário." },
+                        { cmd: "REVOKE DELETE ON Clientes FROM usuario_atendente;", desc: "Remove a permissão de deletar dados da tabela." }
+                    ]
+                },
+                TCL: {
+                    name: "Transaction Control Language (Linguagem de Controle de Transação)",
+                    emoji: "🔄",
+                    explanation: "Gerencia as transações no banco de dados. Garante que um conjunto de operações seja executado completamente ou que nenhuma delas seja executada, mantendo a integridade dos dados.",
+                    commands: ["COMMIT", "ROLLBACK", "SAVEPOINT"],
+                    examples: [
+                        { cmd: "COMMIT;", desc: "Salva permanentemente todas as alterações feitas na transação atual." },
+                        { cmd: "ROLLBACK;", desc: "Desfaz todas as alterações feitas desde o último COMMIT." }
+                    ]
+                }
+            };
+
+            // --- LÓGICA DAS ABAS ---
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.content-tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    playSound(soundEffects.click);
+                    tabs.forEach(t => {
+                        t.classList.remove('bg-gray-700', 'border-cyan-500');
+                        t.classList.add('text-gray-400', 'border-transparent');
+                    });
+                    contents.forEach(c => c.classList.add('hidden'));
+
+                    tab.classList.add('bg-gray-700', 'border-cyan-500');
+                    tab.classList.remove('text-gray-400', 'border-transparent');
+                    
+                    const contentId = `content-${tab.id.split('-')[1]}`;
+                    document.getElementById(contentId).classList.remove('hidden');
+                });
+            });
+
+            // --- LÓGICA DA ABA APRENDER ---
+            const learnButtons = document.querySelectorAll('.learn-btn');
+            const explanationArea = document.getElementById('explanation-area');
+
+            function displayExplanation(groupKey) {
+                const group = sqlGroups[groupKey];
+                
+                learnButtons.forEach(btn => {
+                    btn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
+                    btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                    if(btn.dataset.group === groupKey) {
+                        btn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+                        btn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                    }
+                });
+
+                let examplesHtml = group.examples.map(ex => `
+                    <div class="mt-3">
+                        <code class="block bg-gray-800 text-cyan-400 p-2 rounded">${ex.cmd}</code>
+                        <p class="text-sm text-gray-400 mt-1 ml-1">${ex.desc}</p>
+                    </div>
+                `).join('');
+
+                explanationArea.innerHTML = `
+                    <h2 class="text-2xl font-bold flex items-center gap-3">${group.emoji} ${group.name}</h2>
+                    <p class="text-gray-300 mt-3">${group.explanation}</p>
+                    <h3 class="font-semibold text-lg mt-6 mb-2">Exemplos Práticos:</h3>
+                    ${examplesHtml}
+                `;
+            }
+
+            learnButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    playSound(soundEffects.click);
+                    displayExplanation(btn.dataset.group);
+                });
+            });
+            displayExplanation('DDL'); // Exibir DDL por padrão
+
+            // --- LÓGICA DA ABA IDENTIFICAR ---
+            const commandInput = document.getElementById('sql-command-input');
+            const identifyBtn = document.getElementById('identify-btn');
+            const identifyResult = document.getElementById('identify-result');
+
+            function identifyCommand() {
+                const userInput = commandInput.value.trim().toUpperCase();
+                if (!userInput) return;
+
+                const command = userInput.split(' ')[0];
+                let foundGroup = null;
+
+                for (const groupKey in sqlGroups) {
+                    if (sqlGroups[groupKey].commands.includes(command)) {
+                        foundGroup = sqlGroups[groupKey];
+                        break;
+                    }
+                }
+
+                if (foundGroup) {
+                    playSound(soundEffects.success, "4n");
+                    identifyResult.innerHTML = `
+                        <div class="text-center">
+                            <p class="text-lg">O comando <strong class="text-cyan-400">${command}</strong> pertence ao grupo:</p>
+                            <h3 class="text-3xl font-bold mt-2">${foundGroup.emoji} ${foundGroup.name}</h3>
+                        </div>
+                    `;
+                } else {
+                    playSound(soundEffects.error, "4n");
+                    identifyResult.innerHTML = `
+                        <div class="text-center">
+                            <p class="text-lg text-red-400">Não foi possível identificar o comando <strong class="text-white">${command}</strong>.</p>
+                            <p class="text-gray-400 mt-1">Verifique se digitou corretamente ou tente um comando mais comum.</p>
+                        </div>
+                    `;
+                }
+            }
+            identifyBtn.addEventListener('click', identifyCommand);
+            commandInput.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') identifyCommand();
+            });
+
+            // --- LÓGICA DA ABA TESTE RÁPIDO ---
+            const quizQuestions = [
+                { question: "Qual comando é usado para criar uma nova tabela?", answer: "CREATE", group: "DDL" },
+                { question: "Para consultar dados de uma tabela, qual comando usamos?", answer: "SELECT", group: "DML" },
+                { question: "Qual comando dá permissões a um usuário?", answer: "GRANT", group: "DCL" },
+                { question: "Para salvar permanentemente uma transação, usamos:", answer: "COMMIT", group: "TCL" },
+                { question: "O comando 'UPDATE' pertence a qual grupo?", answer: "DML", group: "DML" },
+            ];
+
+            const startQuizBtn = document.getElementById('start-quiz-btn');
+            const restartQuizBtn = document.getElementById('restart-quiz-btn');
+            const quizStartDiv = document.getElementById('quiz-start');
+            const quizAreaDiv = document.getElementById('quiz-area');
+            const quizEndDiv = document.getElementById('quiz-end');
+            
+            const quizProgress = document.getElementById('quiz-progress');
+            const quizScore = document.getElementById('quiz-score');
+            const quizQuestion = document.getElementById('quiz-question');
+            const quizOptions = document.getElementById('quiz-options');
+            const quizFeedback = document.getElementById('quiz-feedback');
+            const finalScoreEl = document.getElementById('final-score');
+
+            let currentQuestionIndex = 0;
+            let score = 0;
+            
+            function generateOptions(correctAnswer, correctGroup) {
+                let options = [correctAnswer];
+                let allCommands = Object.values(sqlGroups).flatMap(g => g.commands);
+                
+                while(options.length < 4) {
+                    let randomCmd = allCommands[Math.floor(Math.random() * allCommands.length)];
+                    if(!options.includes(randomCmd)) {
+                        options.push(randomCmd);
+                    }
+                }
+                return options.sort(() => Math.random() - 0.5); // Embaralhar
+            }
+
+            function loadQuestion() {
+                quizFeedback.textContent = '';
+                const questionData = quizQuestions[currentQuestionIndex];
+                const options = generateOptions(questionData.answer, questionData.group);
+
+                quizProgress.textContent = `Pergunta ${currentQuestionIndex + 1} de ${quizQuestions.length}`;
+                quizQuestion.textContent = questionData.question;
+                quizOptions.innerHTML = '';
+
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = 'p-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-all quiz-option';
+                    button.onclick = () => checkAnswer(option, questionData.answer, button);
+                    quizOptions.appendChild(button);
+                });
+            }
+
+            function checkAnswer(selected, correct, button) {
+                document.querySelectorAll('.quiz-option').forEach(btn => btn.disabled = true);
+                if (selected === correct) {
+                    score += 10;
+                    quizScore.textContent = `Pontos: ${score}`;
+                    quizFeedback.textContent = 'Correto! 🎉';
+                    quizFeedback.className = 'mt-6 font-bold h-6 text-green-400';
+                    button.classList.add('bg-green-600', 'hover:bg-green-600');
+                    button.classList.remove('bg-gray-700');
+                    playSound(soundEffects.correct);
+                } else {
+                    quizFeedback.textContent = `Incorreto. A resposta era ${correct}.`;
+                    quizFeedback.className = 'mt-6 font-bold h-6 text-red-400';
+                    button.classList.add('bg-red-600', 'hover:bg-red-600');
+                    button.classList.remove('bg-gray-700');
+                    playSound(soundEffects.wrong);
+                }
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < quizQuestions.length) {
+                        loadQuestion();
+                    } else {
+                        endQuiz();
+                    }
+                }, 2000);
+            }
+            
+            function startQuiz() {
+                playSound(soundEffects.click);
+                currentQuestionIndex = 0;
+                score = 0;
+                quizScore.textContent = `Pontos: ${score}`;
+                quizStartDiv.classList.add('hidden');
+                quizEndDiv.classList.add('hidden');
+                quizAreaDiv.classList.remove('hidden');
+                loadQuestion();
+            }
+
+            function endQuiz() {
+                quizAreaDiv.classList.add('hidden');
+                quizEndDiv.classList.remove('hidden');
+                finalScoreEl.textContent = `${score} Pontos`;
+            }
+
+            startQuizBtn.addEventListener('click', startQuiz);
+            restartQuizBtn.addEventListener('click', startQuiz);
+        });
+    </script>
+</body>
+</html>
